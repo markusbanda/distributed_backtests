@@ -23,3 +23,4 @@ C:\source\distributed_backtests\Backtest.Engine\bin\Debug\net10.0\Microsoft.Exte
 C:\source\distributed_backtests\Backtest.Engine\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
 C:\source\distributed_backtests\Backtest.Engine\bin\Debug\net10.0\StackExchange.Redis.dll
 C:\source\distributed_backtests\Backtest.Engine\bin\Debug\net10.0\System.IO.Hashing.dll
+C:\source\distributed_backtests\Backtest.Engine\obj\Debug\net10.0\Backtest.Engine.sourcelink.json

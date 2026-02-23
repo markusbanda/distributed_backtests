@@ -7,6 +7,9 @@ var redis = await ConnectionMultiplexer.ConnectAsync("localhost");
 var db = redis.GetDatabase();
 
 // These classes should be in your Backtest.Engine project
+var baseDir = AppContext.BaseDirectory;
+var filePath = Path.Combine(baseDir, "market_data.csv");
+
 var strategy = new SmaStrategy();
 var ingestor = new DataIngestor();
 
@@ -28,7 +31,7 @@ while (true)
             Console.WriteLine($"[Received] Processing {job.Symbol} | Job: {job.JobId}");
 
             // 3. Run the Engine Logic
-            var data = await ingestor.ReadCsvAsync("market_data.csv");
+            var data = await ingestor.ReadCsvAsync(filePath);
             strategy.Execute(data);
 
             Console.WriteLine($"[Completed] Job {job.JobId} finished.");

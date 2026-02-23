@@ -21,3 +21,4 @@ C:\source\distributed_backtests\Backtest.Orchestrator\obj\Debug\net10.0\refint\B
 C:\source\distributed_backtests\Backtest.Orchestrator\obj\Debug\net10.0\Backtest.Orchestrator.pdb
 C:\source\distributed_backtests\Backtest.Orchestrator\obj\Debug\net10.0\Backtest.Orchestrator.genruntimeconfig.cache
 C:\source\distributed_backtests\Backtest.Orchestrator\obj\Debug\net10.0\ref\Backtest.Orchestrator.dll
+C:\source\distributed_backtests\Backtest.Orchestrator\obj\Debug\net10.0\Backtest.Orchestrator.sourcelink.json

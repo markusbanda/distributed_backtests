@@ -9,3 +9,4 @@ C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Share
 C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\refint\Backtest.Shared.dll
 C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.pdb
 C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\ref\Backtest.Shared.dll
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.sourcelink.json
