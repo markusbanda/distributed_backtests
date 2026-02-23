@@ -3,12 +3,24 @@ using Backtest.Shared;
 using System.Text.Json;
 
 // 1. Connect to Redis (assuming it's running in Docker/Localhost)
-var redis = await ConnectionMultiplexer.ConnectAsync("localhost");
+// Get the connection string from an environment variable, 
+// defaulting to "localhost" for local development.
+string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
+
+var redis = await ConnectionMultiplexer.ConnectAsync(redisConnection);
 var db = redis.GetDatabase();
 
 Console.WriteLine("--- Backtest Orchestrator ---");
-Console.WriteLine("Enter a symbol to backtest (e.g., BTCUSD):");
-var symbol = Console.ReadLine() ?? "GENERIC";
+
+/*** UNCOMMENT THIS CODE BELOW FOR MANUAL CONSOLE SYMBOL INPUT ***/
+//Console.WriteLine("Enter a symbol to backtest (e.g., BTCUSD):");
+//var symbol = Console.ReadLine() ?? "GENERIC";
+/*** END OF MANUAL CONSOLE SYMBOL INPUT CODE ***/
+
+// Check if a symbol was passed via Docker, otherwise ask for one
+string symbol = Environment.GetEnvironmentVariable("TARGET_SYMBOL") ?? "CL"; // Default to Crude Oil if nothing is provided
+
+Console.WriteLine($"Running backtest for: {symbol}");
 
 var batchId = Guid.NewGuid();
 

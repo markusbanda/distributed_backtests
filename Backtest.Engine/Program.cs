@@ -3,10 +3,14 @@ using Backtest.Shared;
 using System.Text.Json;
 
 // 1. Connect to Redis
-var redis = await ConnectionMultiplexer.ConnectAsync("localhost");
+// Get the connection string from an environment variable, 
+// defaulting to "localhost" for local development.
+string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
+
+var redis = await ConnectionMultiplexer.ConnectAsync(redisConnection);
 var db = redis.GetDatabase();
 
-// These classes should be in your Backtest.Engine project
+// Opening dummy market data csv file
 var baseDir = AppContext.BaseDirectory;
 var filePath = Path.Combine(baseDir, "market_data.csv");
 

@@ -1,0 +1,32 @@
+services:
+  # The "Post Office"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # The "Boss" (Orchestrator)
+  # We use 'stdin_open' and 'tty' so we can interact with the Console.ReadLine()
+  orchestrator:
+    build: 
+      context: .
+      dockerfile: Backtest.Orchestrator/Dockerfile
+    environment:
+      - REDIS_CONNECTION=redis
+      - TARGET_SYMBOL=BTCUSD  # Change this to whatever you want to test!
+    depends_on:
+      - redis
+    stdin_open: true 
+    tty: true
+
+  # The "Worker"
+  worker:
+    build: 
+      context: .
+      dockerfile: Backtest.Engine/Dockerfile
+    environment:
+      - REDIS_CONNECTION=redis
+    depends_on:
+      - redis
+    deploy:
+      replicas: 3 # Start 3 workers automatically!
