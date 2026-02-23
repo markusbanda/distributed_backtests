@@ -1,0 +1,11 @@
+C:\source\distributed_backtests\Backtest.Shared\bin\Debug\net10.0\Backtest.Shared.deps.json
+C:\source\distributed_backtests\Backtest.Shared\bin\Debug\net10.0\Backtest.Shared.dll
+C:\source\distributed_backtests\Backtest.Shared\bin\Debug\net10.0\Backtest.Shared.pdb
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.AssemblyInfoInputs.cache
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.AssemblyInfo.cs
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.csproj.CoreCompileInputs.cache
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.dll
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\refint\Backtest.Shared.dll
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\Backtest.Shared.pdb
+C:\source\distributed_backtests\Backtest.Shared\obj\Debug\net10.0\ref\Backtest.Shared.dll
