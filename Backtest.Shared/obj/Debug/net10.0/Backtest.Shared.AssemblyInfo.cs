@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Backtest.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fdd506e9a1f137b200b79c70849b59389dfb1cc2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b0901344a33f7ac27fcc927f18bcfcf82f1f2995")]
 [assembly: System.Reflection.AssemblyProductAttribute("Backtest.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Backtest.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

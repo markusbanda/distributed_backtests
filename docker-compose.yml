@@ -13,7 +13,7 @@ services:
       dockerfile: Backtest.Orchestrator/Dockerfile
     environment:
       - REDIS_CONNECTION=redis
-      - TARGET_SYMBOL=BTCUSD  # Change this to whatever you want to test!
+      - TARGET_SYMBOL=SPY  # Change this to whatever you want to test!
     depends_on:
       - redis
     stdin_open: true 
