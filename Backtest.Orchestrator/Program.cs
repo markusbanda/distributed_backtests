@@ -1,31 +1,33 @@
 ﻿using StackExchange.Redis;
 using Backtest.Shared;
 using System.Text.Json;
+using Backtest.Orchestrator;
 
-// 1. Connect to Redis (assuming it's running in Docker/Localhost)
-// Get the connection string from an environment variable, 
-// defaulting to "localhost" for local development.
+// 1. Setup Connection Logic
 string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
+Console.WriteLine($"Connecting to Redis at: {redisConnection}");
 
 var redis = await ConnectionMultiplexer.ConnectAsync(redisConnection);
 var db = redis.GetDatabase();
 
-Console.WriteLine("--- Backtest Orchestrator ---");
+// 2. Initialize our helper classes
+var aggregator = new ResultAggregator(db);
 
-/*** UNCOMMENT THIS CODE BELOW FOR MANUAL CONSOLE SYMBOL INPUT ***/
-//Console.WriteLine("Enter a symbol to backtest (e.g., BTCUSD):");
-//var symbol = Console.ReadLine() ?? "GENERIC";
-/*** END OF MANUAL CONSOLE SYMBOL INPUT CODE ***/
-
-// Check if a symbol was passed via Docker, otherwise ask for one
-string symbol = Environment.GetEnvironmentVariable("TARGET_SYMBOL") ?? "CL"; // Default to Crude Oil if nothing is provided
-
-Console.WriteLine($"Running backtest for: {symbol}");
+// 3. User Input (or Environment Variable for Docker)
+string symbol = Environment.GetEnvironmentVariable("TARGET_SYMBOL") ?? "CL"; // Default to Crude Oil futures if nothing is provided
+if (string.IsNullOrEmpty(symbol))
+{
+    Console.WriteLine("Enter a symbol to backtest (e.g., BTCUSD):");
+    symbol = Console.ReadLine() ?? "GENERIC";
+}
 
 var batchId = Guid.NewGuid();
+int totalJobs = 10;
 
-// 2. Create 10 "Jobs" (Simulating slicing 10 months of data)
-for (int i = 0; i < 10; i++)
+// 4. Distribution Phase
+Console.WriteLine($"\n--- Starting Batch {batchId} for {symbol} ---");
+
+for (int i = 0; i < totalJobs; i++)
 {
     var job = new BacktestJob(
         batchId, 
@@ -35,13 +37,15 @@ for (int i = 0; i < 10; i++)
         DateTime.Now.AddMonths(-i + 1)
     );
 
-    // Serialize to JSON for transport
     string message = JsonSerializer.Serialize(job);
-
-    // 3. Push to Redis List (The 'Work Queue')
     await db.ListLeftPushAsync("job_queue", message);
     
-    Console.WriteLine($"[Sent] Job {job.JobId} for {symbol} pushed to queue.");
+    Console.WriteLine($"[Sent] Job {i + 1}/{totalJobs} pushed to Redis.");
 }
 
-Console.WriteLine("\nAll jobs distributed. Waiting for workers to pick them up...");
+// 5. Aggregation Phase
+// We 'await' this so the program stays alive until all results are in.
+await aggregator.MonitorResultsAsync(batchId, totalJobs);
+
+Console.WriteLine("Press any key to exit or wait for next manual run...");
+// If running in Docker, the container will exit here after the report is printed.
