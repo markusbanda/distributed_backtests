@@ -1,14 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "1W6uWieW6d0=",
+  "dgSpecHash": "6X1IU5IcMJs=",
   "success": true,
   "projectFilePath": "C:\\source\\distributed_backtests\\Backtest.Engine\\Backtest.Engine.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mrban\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\mrban\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\mrban\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
-    "C:\\Users\\mrban\\.nuget\\packages\\polly\\8.6.5\\polly.8.6.5.nupkg.sha512",
-    "C:\\Users\\mrban\\.nuget\\packages\\polly.core\\8.6.5\\polly.core.8.6.5.nupkg.sha512",
     "C:\\Users\\mrban\\.nuget\\packages\\stackexchange.redis\\2.11.3\\stackexchange.redis.2.11.3.nupkg.sha512",
     "C:\\Users\\mrban\\.nuget\\packages\\sylvan.data.csv\\1.4.3\\sylvan.data.csv.1.4.3.nupkg.sha512",
     "C:\\Users\\mrban\\.nuget\\packages\\system.io.hashing\\10.0.2\\system.io.hashing.10.0.2.nupkg.sha512"
