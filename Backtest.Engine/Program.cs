@@ -4,9 +4,7 @@ using Backtest.Engine;
 using System.Text.Json;
 using System.IO;
 
-// 1. Setup Connection Logic
-// We pull the Redis connection string from Environment Variables for Docker compatibility.
-// If not found (e.g., running locally without Docker), it defaults to "localhost".
+// 1. Connection Config
 string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
 
 Console.WriteLine("========================================");
@@ -15,7 +13,7 @@ Console.WriteLine("========================================");
 Console.WriteLine($"[*] Target Environment: {(Environment.GetEnvironmentVariable("REDIS_CONNECTION") != null ? "Docker" : "Local")}");
 Console.WriteLine($"[*] Connecting to Redis at: {redisConnection}");
 
-// 2. Initialize Redis Connection
+// 2. Initialize Redis
 ConnectionMultiplexer redis;
 try
 {
@@ -23,14 +21,15 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"[FATAL] Could not connect to Redis: {ex.Message}");
+    Console.WriteLine($"[FATAL] Redis Connection Failed: {ex.Message}");
     return;
 }
 
 var db = redis.GetDatabase();
 
 // 3. Initialize Strategy and CSV Ingestor
-var strategy = new SmaStrategy();
+var strategy = new EmaStrategy{ Period = 14};
+//var strategy = new SmaStrategy();
 var ingestor = new DataIngestor();
 
 // Resolve the path to the CSV file ensuring it works locally and in Docker
@@ -49,76 +48,54 @@ while (true)
 {
     try
     {
-        // 'ListRightPopAsync' blocks until a job is available.
-        // This is a common pattern for distributed task queues.
         var result = await db.ListRightPopAsync("job_queue");
 
         if (result.HasValue)
         {
-            // Deserialize the job from Redis (sent by the Orchestrator)
             var job = JsonSerializer.Deserialize<BacktestJob>((string)result!);
 
             if (job != null)
             {
                 Console.WriteLine("\n------------------------------------------------");
-                Console.WriteLine($"[JOB START] Batch: {job.BatchId}");
                 Console.WriteLine($"[JOB START] ID:    {job.JobId}");
-                Console.WriteLine($"[JOB START] Asset: {job.Symbol}");
                 Console.WriteLine($"[JOB START] Range: {job.Start:yyyy-MM-dd} to {job.End:yyyy-MM-dd}");
                 Console.WriteLine("------------------------------------------------");
 
-                // A. Fetch Market Data from local CSV matching the job parameters
-                Console.WriteLine($"[FETCH] Reading local CSV data for {job.Symbol}...");
                 var data = await ingestor.ReadCsvAsync(filePath, job.Symbol, job.Start, job.End);
+
+                decimal pnl = 0m;
+                int count = 0;
 
                 if (data != null && data.Count > 0)
                 {
                     Console.WriteLine($"[EXE] Running strategy on {data.Count} points.");
-                    
-                    // B. Execute Strategy
                     strategy.Execute(data);
-
-                    // C. Report Results
-
-                    var strategyResult = new StrategyResult(
-                        job.BatchId,
-                        job.JobId,
-                        245.50m, // Simulated Total PnL for this segment
-                        data.Count // Total trades/data points processed
-                    );
-
-                    await Task.Delay(10000);
-                    await db.ListLeftPushAsync("results_queue", JsonSerializer.Serialize(strategyResult));
-                    Console.WriteLine($"[SUCCESS] Result sent for {job.JobId}");
+                    
+                    pnl = 150.75m; // Your simulated PnL
+                    count = data.Count;
                 }
                 else
                 {
-                    Console.WriteLine($"[WARNING] No data found in CSV for {job.Symbol} within the requested date range.");
-                    
-                    // FIX: Always report back to the orchestrator to prevent hangs!
-                    var emptyResult = new StrategyResult(
-                        job.BatchId, 
-                        job.JobId, 
-                        0m, // 0 PnL
-                        0   // 0 Data points processed
-                    );
-                    
-                    await Task.Delay(10000);
-                    await db.ListLeftPushAsync("results_queue", JsonSerializer.Serialize(emptyResult));
+                    Console.WriteLine($"[WARNING] No data found in CSV for {job.Symbol} within range.");
                 }
+
+                // FIX: Always send a result, even if PnL and count are 0
+                var strategyResult = new StrategyResult(
+                    job.BatchId,
+                    job.JobId,
+                    pnl,
+                    count
+                );
+
+                await db.ListLeftPushAsync("results_queue", JsonSerializer.Serialize(strategyResult));
+                Console.WriteLine($"[REPORT] Completion sent for {job.JobId} (Count: {count})");
             }
         }
     }
-    catch (JsonException jex)
-    {
-        Console.WriteLine($"[ERROR] Failed to parse job JSON: {jex.Message}");
-    }
     catch (Exception ex)
     {
-        Console.WriteLine($"[ERROR] Critical error during job processing: {ex.Message}");
-        // We log the error but keep the worker alive to try the next job.
+        Console.WriteLine($"[ERR] Loop Error: {ex.Message}");
     }
 
-    // A 100ms heartbeat delay to prevent high CPU usage when the queue is empty.
-    await Task.Delay(100);
+    await Task.Delay(200);
 }

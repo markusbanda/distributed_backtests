@@ -21,29 +21,10 @@ public class MarketDataClient
 
         _httpClient = new HttpClient(handler);
         
-<<<<<<< HEAD
-        // Headers must be very specific to look like a modern browser
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
-        _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/ *;q=0.8");
-        _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
-
-        //Default retry policy
-        _retryPolicy = Policy
-            .Handle<HttpRequestException>(ex => ex.StatusCode == HttpStatusCode.Unauthorized || ex.StatusCode == HttpStatusCode.Forbidden)
-            .Or<Exception>()
-            .WaitAndRetryAsync(3, retryAttempt => 
-                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000)),
-                (exception, timeSpan, count, context) =>
-                {
-                    Console.WriteLine($"[Retry] Attempt {count} failed. Retrying in {timeSpan.TotalSeconds:N2}s... Error: {exception.Message}");
-                    _crumb = null; // Clear crumb to force a new handshake on retry
-                });
-=======
         // Essential headers to avoid immediate 403s
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
 		_httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
->>>>>>> b5284e21f2c3b2a8f67e6b7d1f5f62416d9cf5e6
     }
 
     private async Task EnsureHandshakeAsync(string symbol)
