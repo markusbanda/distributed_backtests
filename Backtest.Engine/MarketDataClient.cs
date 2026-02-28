@@ -30,8 +30,7 @@ public class MarketDataClient
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/ *;q=0.8");
         _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
 
-        // Define a retry policy: Retry up to 3 times if we get a 401 or a network error.
-        // We use "Exponential Backoff with Jitter" to prevent workers from hitting at the same time.
+        //Default retry policy
         _retryPolicy = Policy
             .Handle<HttpRequestException>(ex => ex.StatusCode == HttpStatusCode.Unauthorized || ex.StatusCode == HttpStatusCode.Forbidden)
             .Or<Exception>()

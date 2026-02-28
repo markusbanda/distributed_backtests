@@ -2,6 +2,7 @@
 using Backtest.Shared;
 using Backtest.Engine; 
 using System.Text.Json;
+using System.IO;
 
 // 1. Connection Config
 string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
@@ -9,6 +10,8 @@ string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") 
 Console.WriteLine("========================================");
 Console.WriteLine("       DISTRIBUTED WORKER ENGINE        ");
 Console.WriteLine("========================================");
+Console.WriteLine($"[*] Target Environment: {(Environment.GetEnvironmentVariable("REDIS_CONNECTION") != null ? "Docker" : "Local")}");
+Console.WriteLine($"[*] Connecting to Redis at: {redisConnection}");
 
 // 2. Initialize Redis
 ConnectionMultiplexer redis;
@@ -23,17 +26,23 @@ catch (Exception ex)
 }
 
 var db = redis.GetDatabase();
-var strategy = new SmaStrategy();
-var marketClient = new MarketDataClient();
 
-// JITTER: Random startup delay to prevent thundering herd on Yahoo
-int startDelay = new Random().Next(1000, 5000);
+// 3. Initialize Strategy and CSV Ingestor
+var strategy = new SmaStrategy();
+var ingestor = new DataIngestor();
+
+// Resolve the path to the CSV file ensuring it works locally and in Docker
+var baseDir = AppContext.BaseDirectory;
+var filePath = Path.Combine(baseDir, "market_data.csv");
+
+// JITTER: Random startup delay to prevent all workers hitting Redis at the exact same time
+int startDelay = new Random().Next(500, 2000);
 Console.WriteLine($"[*] Worker starting with {startDelay}ms jitter delay...");
 await Task.Delay(startDelay);
 
 Console.WriteLine("[*] Worker Active. Waiting for jobs...");
 
-// 3. Main Loop
+// 4. Main Loop
 while (true)
 {
     try
@@ -46,16 +55,25 @@ while (true)
 
             if (job != null)
             {
-                Console.WriteLine($"\n[JOB] Asset: {job.Symbol} | Range: {job.Start:yyyy-MM} to {job.End:yyyy-MM}");
+                Console.WriteLine("\n------------------------------------------------");
+                Console.WriteLine($"[JOB START] Batch: {job.BatchId}");
+                Console.WriteLine($"[JOB START] ID:    {job.JobId}");
+                Console.WriteLine($"[JOB START] Asset: {job.Symbol}");
+                Console.WriteLine($"[JOB START] Range: {job.Start:yyyy-MM-dd} to {job.End:yyyy-MM-dd}");
+                Console.WriteLine("------------------------------------------------");
 
-                // Fetch with Polly Retries
-                var data = await marketClient.GetHistoricalDataAsync(job.Symbol, job.Start, job.End);
+                // A. Fetch Market Data from local CSV matching the job parameters
+                Console.WriteLine($"[FETCH] Reading local CSV data for {job.Symbol}...");
+                var data = await ingestor.ReadCsvAsync(filePath, job.Symbol, job.Start, job.End);
 
                 if (data != null && data.Count > 0)
                 {
                     Console.WriteLine($"[EXE] Running strategy on {data.Count} points.");
+                    
+                    // B. Execute Strategy
                     strategy.Execute(data);
 
+                    // C. Report Results
                     var strategyResult = new StrategyResult(
                         job.BatchId,
                         job.JobId,
@@ -63,15 +81,31 @@ while (true)
                         data.Count
                     );
 
+                    await Task.Delay(10000);
                     await db.ListLeftPushAsync("results_queue", JsonSerializer.Serialize(strategyResult));
-                    Console.WriteLine($"[FIN] Result sent for {job.JobId}");
+                    Console.WriteLine($"[SUCCESS] Result sent for {job.JobId}");
                 }
                 else
                 {
-                    Console.WriteLine("[WARN] Data fetch returned no results.");
+                    Console.WriteLine($"[WARNING] No data found in CSV for {job.Symbol} within the requested date range.");
+                    
+                    // FIX: Always report back to the orchestrator to prevent hangs!
+                    var emptyResult = new StrategyResult(
+                        job.BatchId, 
+                        job.JobId, 
+                        0m, // 0 PnL
+                        0   // 0 Data points processed
+                    );
+                    
+                    await Task.Delay(10000);
+                    await db.ListLeftPushAsync("results_queue", JsonSerializer.Serialize(emptyResult));
                 }
             }
         }
+    }
+    catch (JsonException jex)
+    {
+        Console.WriteLine($"[ERROR] Failed to parse job JSON: {jex.Message}");
     }
     catch (Exception ex)
     {

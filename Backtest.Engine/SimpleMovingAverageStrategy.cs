@@ -29,13 +29,9 @@ public class SmaStrategy
             decimal sma = CalculateSma(window);
             decimal currentPrice = dataSpan[i].Close;
 
-            //Console.WriteLine($"Data Span = {dataSpan[i].DateTime}");
-            //Console.WriteLine($"Current Price = {currentPrice}");
-            //Console.WriteLine($"SMA = {sma}");
-
             if (currentPrice > sma)
             {
-                // Logic: Buy Signal (We'll just log for now)
+                // TODO Logic: Buy Signal (We'll just log for now)
                 Console.WriteLine($"[{dataSpan[i].DateTime}] BUY at {currentPrice}");
             }
         }
