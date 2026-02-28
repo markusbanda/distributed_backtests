@@ -4,7 +4,9 @@ using Backtest.Engine;
 using System.Text.Json;
 using System.IO;
 
-// 1. Connection Config
+// 1. Setup Connection Logic
+// We pull the Redis connection string from Environment Variables for Docker compatibility.
+// If not found (e.g., running locally without Docker), it defaults to "localhost".
 string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost";
 
 Console.WriteLine("========================================");
@@ -13,7 +15,7 @@ Console.WriteLine("========================================");
 Console.WriteLine($"[*] Target Environment: {(Environment.GetEnvironmentVariable("REDIS_CONNECTION") != null ? "Docker" : "Local")}");
 Console.WriteLine($"[*] Connecting to Redis at: {redisConnection}");
 
-// 2. Initialize Redis
+// 2. Initialize Redis Connection
 ConnectionMultiplexer redis;
 try
 {
@@ -21,7 +23,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"[FATAL] Redis Connection Failed: {ex.Message}");
+    Console.WriteLine($"[FATAL] Could not connect to Redis: {ex.Message}");
     return;
 }
 
@@ -47,10 +49,13 @@ while (true)
 {
     try
     {
+        // 'ListRightPopAsync' blocks until a job is available.
+        // This is a common pattern for distributed task queues.
         var result = await db.ListRightPopAsync("job_queue");
 
         if (result.HasValue)
         {
+            // Deserialize the job from Redis (sent by the Orchestrator)
             var job = JsonSerializer.Deserialize<BacktestJob>((string)result!);
 
             if (job != null)
@@ -74,11 +79,12 @@ while (true)
                     strategy.Execute(data);
 
                     // C. Report Results
+
                     var strategyResult = new StrategyResult(
                         job.BatchId,
                         job.JobId,
-                        150.75m, // Simulated PnL
-                        data.Count
+                        245.50m, // Simulated Total PnL for this segment
+                        data.Count // Total trades/data points processed
                     );
 
                     await Task.Delay(10000);
@@ -109,9 +115,10 @@ while (true)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[ERR] Loop Error: {ex.Message}");
+        Console.WriteLine($"[ERROR] Critical error during job processing: {ex.Message}");
+        // We log the error but keep the worker alive to try the next job.
     }
 
-    // Polling delay
-    await Task.Delay(200);
+    // A 100ms heartbeat delay to prevent high CPU usage when the queue is empty.
+    await Task.Delay(100);
 }
