@@ -7,7 +7,7 @@ namespace Backtest.Engine
 {
     public class EmaStrategy
     {
-        public int Period { get; set; } = 20;
+        public int Period { get; set; } = 14;
 
         /// <summary>
         /// Executes the EMA strategy. 
@@ -39,11 +39,11 @@ namespace Backtest.Engine
                 // Simple Signal Logic
                 if (close > currentEma)
                 {
-                    Console.WriteLine($"[{data[i].DateTime:MM/dd/yyyy HH:mm:ss}] EMA BUY Signal at {close:F2} (EMA: {currentEma:F2})");
+                    //Console.WriteLine($"[{data[i].DateTime:MM/dd/yyyy HH:mm:ss}] EMA BUY Signal at {close:F2} (EMA: {currentEma:F2})");
                 }
                 else if (close < currentEma)
                 {
-                    Console.WriteLine($"[{data[i].DateTime:MM/dd/yyyy HH:mm:ss}] EMA SELL Signal at {close:F2} (EMA: {currentEma:F2})");
+                    //Console.WriteLine($"[{data[i].DateTime:MM/dd/yyyy HH:mm:ss}] EMA SELL Signal at {close:F2} (EMA: {currentEma:F2})");
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using StackExchange.Redis;
+﻿﻿using StackExchange.Redis;
 using Backtest.Shared;
 using System.Text.Json;
 using System.Diagnostics;
@@ -58,7 +58,7 @@ int receivedCount = 0;
 decimal totalPnL = 0m;
 
 // Loop continues while we still have pending jobs AND we haven't timed out
-while (pendingJobs.Count > 0 && sw.Elapsed < timeout)
+while (pendingJobs.Count > 0 /*&& sw.Elapsed < timeout*/)
 {
     var result = await db.ListRightPopAsync("results_queue");
 

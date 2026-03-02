@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Backtest.Engine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+182f0953cc3ea724464c9ee58344d3d89d350134")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+308af4102651d3b5c2fca301a82e17fdae4731ea")]
 [assembly: System.Reflection.AssemblyProductAttribute("Backtest.Engine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Backtest.Engine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
